@@ -1,0 +1,100 @@
+#include <iostream>
+#include <vector>
+#include <ctime>
+using namespace std;
+
+class Minesweeper {
+private:
+    const int SIDE = 10; // Board size
+    const int MINES = 15; // Number of mines
+    vector<vector<int>> realBoard;
+    vector<vector<char>> myBoard;
+
+public:
+    Minesweeper() {
+        realBoard.resize(SIDE, vector<int>(SIDE, 0));
+        myBoard.resize(SIDE, vector<char>(SIDE, '?'));
+        initializeBoard();
+    }
+
+    void play() {
+        printBoard();
+        while (true) {
+            int x, y;
+            cout << "Enter row and column (e.g., 2 3): ";
+            cin >> x >> y;
+            if (!isValid(x, y)) {
+                cout << "Invalid input. Try again.\n";
+                continue;
+            }
+            revealCell(x, y);
+            printBoard();
+        }
+    }
+
+private:
+    void initializeBoard() {
+        srand(time(nullptr));
+        for (int i = 0; i < MINES; ++i) {
+            int x = rand() % SIDE;
+            int y = rand() % SIDE;
+            realBoard[x][y] = -1; // -1 represents a mine
+        }
+    }
+
+    void printBoard() {
+        cout << "  ";
+        for (int i = 0; i < SIDE; ++i)
+            cout << i << " ";
+        cout << "\n";
+
+        for (int i = 0; i < SIDE; ++i) {
+            cout << i << " ";
+            for (int j = 0; j < SIDE; ++j)
+                cout << myBoard[i][j] << " ";
+            cout << "\n";
+        }
+    }
+
+    bool isValid(int x, int y) {
+        return (x >= 0 && x < SIDE && y >= 0 && y < SIDE);
+    }
+
+    void revealCell(int x, int y) {
+        if (!isValid(x, y) || myBoard[x][y] != '?')
+            return;
+
+        if (realBoard[x][y] == -1) {
+            cout << "Game Over! You hit a mine.\n";
+            exit(0);
+        }
+
+        int countMines = 0;
+        for (int dx = -1; dx <= 1; ++dx) {
+            for (int dy = -1; dy <= 1; ++dy) {
+                int nx = x + dx;
+                int ny = y + dy;
+                if (isValid(nx, ny) && realBoard[nx][ny] == -1)
+                    countMines++;
+            }
+        }
+
+        myBoard[x][y] = '0' + countMines;
+        if (countMines == 0) {
+            for (int dx = -1; dx <= 1; ++dx) {
+                for (int dy = -1; dy <= 1; ++dy) {
+                    int nx = x + dx;
+                    int ny = y + dy;
+                    if (isValid(nx, ny))
+                        revealCell(nx, ny);
+                }
+            }
+        }
+    }
+};
+
+int main() {
+    Minesweeper game;
+    game.play();
+    return 0;
+}
